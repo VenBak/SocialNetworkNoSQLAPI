@@ -1,32 +1,77 @@
-const { Schema, model } = require('mongoose');
+const { Schema, model, Types } = require('mongoose');
 
-// Schema to create User model
-const thoughtSchema = new Schema(
+// Reactions Schema
+const reactionSchema = new Schema(
   {
-    thoughtText: String,
-    CreatedAt: String,
-    username: String,
-    // reactions: []
+    reactionId: {
+      type: Schema.Types.ObjectId,
+      default: () => new Types.ObjectId(),
+    },
+    reactionBody: {
+      type: String,
+      required: true,
+      maxLength: [280, 'Maximum characters reached']
+    },
+    username: {
+      type: String,
+      required: true,
+    },
+    createdAt: {
+      type: Date,
+      default: Date.now,
+      get: format_date,
+    },
   },
   {
-    // Mongoose supports two Schema options to transform Objects after querying MongoDb: toJSON and toObject.
-    // Here we are indicating that we want virtuals to be included with our response, overriding the default behavior
     toJSON: {
       virtuals: true,
+      getters: true,
     },
     id: false,
   }
 );
 
-// Create a virtual property `fullName` that gets and sets the user's full name
-thoughtSchema
-  .virtual('reactionCount')
-  // Gets number of friends
-  .numberReactions(function () {
-    return 'This person has '`${this.length} reactions`;
+// Thought Schema
+const thoughtSchema = new Schema(
+  {
+    thoughtText: {
+      type: String,
+      required: true,
+      minLength: [1, 'Thought text required'],
+      maxLength: [280, 'Maximum characters reached']
+    },
+    createdAt: {
+      type: Date,
+      default: Date.now,
+      get: format_date,
+    },
+    username: {
+      type: String,
+      required: true,
+    },
+    reactions: [reactionSchema],
+  },
+  {
+    toJSON: {
+      virtuals: true,
+      getters: true,
+    },
+    id: false,
+  }
+);
+
+// Function to format date to MM/DD/YYYY
+function format_date(date) {
+  return date.toLocaleString();
+}
+
+// Virtual that gets length of reactions array
+thoughtSchema.virtual('reactionCount ')
+  .get(function () {
+      return this.reactions.length;
   })
 
-// Initialize our User model
-const Thought = model('user', thoughtSchema);
+// Initialize the model
+const Thought = model('thought', thoughtSchema);
 
 module.exports = Thought;
