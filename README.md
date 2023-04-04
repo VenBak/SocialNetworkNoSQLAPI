@@ -33,3 +33,5 @@ Example of the user JSON:
 
 ![json](./assets/json.png)
 
+Here's a video of what the routes should look like: https://www.youtube.com/watch?v=oWtFxp0o1L8 
+
